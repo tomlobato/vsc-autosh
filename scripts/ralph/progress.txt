@@ -13,6 +13,8 @@ Started: Seg  2 Mar 2026 10:28:36 -03
 - Use `WorkspaceEdit` (not `editor.edit()`) when the document isn't yet open in an editor
 - `onDidCreateFiles` fires for new files only — not when opening existing files
 - chmod uses `fs.promises.chmod(path, 0o755)` with try/catch, skipped on Windows
+- Quick Pick: `showQuickPick(items)` returns `undefined` on cancel — use for user selection with abort
+- Cursor positioning in existing docs: use `content.split('\n').length - 1` not `document.lineCount`
 
 ---
 
@@ -43,4 +45,22 @@ Started: Seg  2 Mar 2026 10:28:36 -03
   - `onDidCreateFiles` provides a `FileCreateEvent` with a `files` array of URIs — iterate to handle each
   - Cursor positioning after insert: count lines of inserted content, place on the empty line after shebang
   - `document.getText().length` is the reliable way to check if a file is empty (not `lineCount`)
+---
+
+## 2026-03-02 - US-004
+- What was implemented: Manual "Add Shebang" command (`handleAddShebangCommand` in `src/handlers.ts`) registered as `autosh.addShebang` in `src/extension.ts`. Handles active editor check, existing shebang detection, recognized/unrecognized extensions with Quick Pick fallback, shebang+template insertion, chmod, cursor positioning, notification, and status bar flash.
+- Files changed: src/handlers.ts (added `handleAddShebangCommand`, imported `getAllShebangs`), src/extension.ts (replaced stub with real handler call)
+- **Learnings for future iterations:**
+  - For cursor positioning when inserting into an existing document, use `content.split('\n').length - 1` rather than `document.lineCount` (which includes pre-existing lines)
+  - `showQuickPick` returns `undefined` on cancel — clean pattern for user abort
+  - Quick Pick items use `label` (displayed prominently) and `description` (shown dimmed) — good for showing extension + shebang pairs
+  - The non-null assertion `picked.description!` is safe because we constructed items with `description` always set
+---
+
+## 2026-03-02 - US-005
+- What was implemented: README.md for VS Code Marketplace with title, description, feature list, Usage section (automatic + manual), Supported Extensions table, Configuration table (all 5 settings), and Template Example section
+- Files changed: README.md (new)
+- **Learnings for future iterations:**
+  - README is a documentation-only story — no code changes, just typecheck to confirm nothing is broken
+  - Anchor links in markdown tables (e.g., `[Supported Extensions](#supported-extensions)`) provide good cross-referencing for settings defaults
 ---
