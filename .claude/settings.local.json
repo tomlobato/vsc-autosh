@@ -3,7 +3,10 @@
     "allow": [
       "WebFetch(domain:github.com)",
       "WebFetch(domain:code.visualstudio.com)",
-      "Bash(echo exit: $?:*)"
+      "Bash(echo exit: $?:*)",
+      "Bash(npx vsce:*)",
+      "Bash(npm run:*)",
+      "Bash(node:*)"
     ]
   }
 }

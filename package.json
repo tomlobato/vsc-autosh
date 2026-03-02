@@ -2,12 +2,11 @@
   "name": "autosh",
   "displayName": "autosh",
   "description": "Auto-insert shebangs, chmod +x, and position cursor when creating script files",
-  "version": "0.1.0",
-  "publisher": "tomcz",
-  "icon": "icon.png",
+  "version": "0.1.1",
+  "publisher": "tlobato",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomcz/autosh"
+    "url": "https://github.com/tomlobato/autosh"
   },
   "categories": [
     "Other"
