@@ -1,0 +1,114 @@
+{
+  "project": "autosh",
+  "branchName": "ralph/autosh-v0.1",
+  "description": "VS Code extension that auto-inserts shebangs, chmod +x, and positions cursor when creating script files",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Project scaffolding and build setup",
+      "description": "As a developer, I need the extension project fully scaffolded so that all subsequent stories have a working build pipeline and package.json with settings/commands declared.",
+      "acceptanceCriteria": [
+        "package.json has name 'autosh', displayName 'autosh', publisher, description, categories, repository, icon field, engines.vscode, activationEvents: ['onStartupFinished']",
+        "package.json contributes.configuration declares all 5 settings: autosh.shebangs (object, with defaults for .sh/.zsh/.fish/.py/.rb/.pl), autosh.templates (object, default {}), autosh.enabledExtensions (string[], default ['.sh']), autosh.showNotification (boolean, default true), autosh.showStatusBar (boolean, default true)",
+        "package.json contributes.commands declares autosh.addShebang with title 'Autosh: Add Shebang'",
+        "package.json has scripts: compile (esbuild), watch, check-types (tsc --noEmit), package (vsce package)",
+        "tsconfig.json targets ES2020, module commonjs, strict mode, outDir dist, rootDir src, excludes node_modules",
+        "esbuild.js bundles src/extension.ts to dist/extension.js as commonjs, externals: ['vscode'], minified in production",
+        ".vscode/launch.json has 'Extension' debug config launching extensionDevelopmentPath",
+        ".vscode/tasks.json has npm watch task",
+        ".vscodeignore excludes src/, node_modules/, .vscode/, tsconfig.json, esbuild.js, *.ts",
+        ".gitignore excludes node_modules/, dist/, *.vsix",
+        "Create a minimal src/extension.ts stub with empty activate/deactivate so the project compiles",
+        "npm install succeeds and npm run compile produces dist/extension.js",
+        "Typecheck passes (npm run check-types)"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Config and status bar modules",
+      "description": "As a developer, I need the config reader (src/config.ts) and status bar indicator (src/statusbar.ts) modules so that the handler logic can use them.",
+      "acceptanceCriteria": [
+        "src/config.ts exports getShebangForExtension(ext: string): string | undefined — reads autosh.shebangs[ext] from workspace.getConfiguration('autosh')",
+        "src/config.ts exports getTemplateForExtension(ext: string): string — reads autosh.templates[ext], returns '' if not defined",
+        "src/config.ts exports isExtensionEnabled(ext: string): boolean — checks if ext is in autosh.enabledExtensions array",
+        "src/config.ts exports getAllShebangs(): Record<string, string> — returns the full autosh.shebangs object for Quick Pick usage",
+        "Config functions read settings fresh each call (no caching) so changes take effect without restart",
+        "src/statusbar.ts exports a function that creates a StatusBarItem aligned to the right with text '$(check) autosh'",
+        "Status bar item is hidden by default, shown for 3 seconds when flash is called, then auto-hides",
+        "Status bar flash respects autosh.showStatusBar setting — if false, does nothing",
+        "Status bar item is added to context.subscriptions for proper disposal",
+        "Typecheck passes (npm run check-types)"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Auto-setup handler and extension entry point",
+      "description": "As a developer, I want new script files to automatically get a shebang, chmod +x, and cursor positioned so I can start coding immediately.",
+      "acceptanceCriteria": [
+        "src/handlers.ts exports handleFileCreated(uri, statusBar) that processes a single file URI",
+        "Handler extracts file extension via path.extname and checks isExtensionEnabled — returns early if not enabled",
+        "Handler opens the document via workspace.openTextDocument and checks if it is empty (0 characters) — returns early if not empty",
+        "Handler builds content: shebang + '\\n\\n' + template (if configured) + '\\n' — using getShebangForExtension and getTemplateForExtension",
+        "Content is inserted at position (0,0) via WorkspaceEdit and workspace.applyEdit",
+        "Document is saved after edit via document.save()",
+        "chmod 0o755 is applied via fs.promises.chmod on non-Windows platforms (process.platform !== 'win32'), wrapped in try/catch that logs warning on failure",
+        "File is opened in editor via window.showTextDocument, cursor positioned on first empty line after inserted content",
+        "Cursor position is visible via editor.revealRange",
+        "If autosh.showNotification is true, shows information message 'autosh: shebang added + chmod +x'",
+        "Status bar flash is triggered after successful setup",
+        "src/extension.ts activate() registers workspace.onDidCreateFiles listener that calls handleFileCreated for each created file",
+        "src/extension.ts activate() creates the status bar item and registers the autosh.addShebang command (can be a stub for now)",
+        "All disposables pushed to context.subscriptions",
+        "deactivate() is an empty function",
+        "Typecheck passes (npm run check-types)"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Manual 'Add Shebang' command",
+      "description": "As a developer, I want a command palette action to add a shebang to an existing file so I can fix files created before installing autosh.",
+      "acceptanceCriteria": [
+        "src/handlers.ts exports handleAddShebangCommand(statusBar) registered as autosh.addShebang in extension.ts",
+        "If no active text editor, shows error message 'No active editor' and returns",
+        "If file already starts with '#!' (first line), shows warning 'File already has a shebang' and returns",
+        "If file extension is recognized (has entry in autosh.shebangs), uses that shebang",
+        "If file extension is unrecognized, shows Quick Pick with all available shebangs from getAllShebangs() for user to choose — items show extension and shebang string",
+        "If user cancels Quick Pick, returns without action",
+        "After determining shebang, inserts shebang + '\\n\\n' + template (if any) at position (0,0) via WorkspaceEdit",
+        "Applies chmod +x (same logic as auto handler — skip Windows, try/catch)",
+        "Positions cursor on first empty line after inserted content",
+        "Shows notification and flashes status bar (respecting settings)",
+        "Typecheck passes (npm run check-types)"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "README for marketplace",
+      "description": "As a developer publishing autosh, I need a README with feature overview, configuration table, and usage examples for the VS Code Marketplace listing.",
+      "acceptanceCriteria": [
+        "README.md exists at project root",
+        "Has a title, short description, and feature list (auto-shebang, auto-chmod, cursor positioning, configurable, manual command, status bar)",
+        "Has a 'Configuration' section with a table of all 5 autosh.* settings showing setting name, type, default, and description",
+        "Has a 'Usage' section explaining automatic behavior on file creation and the manual command",
+        "Has a 'Supported Extensions' section listing .sh, .zsh, .fish, .py, .rb, .pl with their default shebangs",
+        "Has a 'Template Example' section showing how to configure autosh.templates for set -euo pipefail",
+        "Typecheck passes (npm run check-types)"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

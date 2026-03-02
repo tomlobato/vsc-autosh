@@ -1,0 +1,84 @@
+{
+  "name": "autosh",
+  "displayName": "autosh",
+  "description": "Auto-insert shebangs, chmod +x, and position cursor when creating script files",
+  "version": "0.1.0",
+  "publisher": "tomcz",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tomcz/autosh"
+  },
+  "categories": [
+    "Other"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "scripts": {
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "check-types": "tsc --noEmit",
+    "package": "vsce package"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "autosh",
+      "properties": {
+        "autosh.shebangs": {
+          "type": "object",
+          "default": {
+            ".sh": "#!/usr/bin/env bash",
+            ".zsh": "#!/usr/bin/env zsh",
+            ".fish": "#!/usr/bin/env fish",
+            ".py": "#!/usr/bin/env python3",
+            ".rb": "#!/usr/bin/env ruby",
+            ".pl": "#!/usr/bin/env perl"
+          },
+          "description": "Map of file extensions to shebang lines"
+        },
+        "autosh.templates": {
+          "type": "object",
+          "default": {},
+          "description": "Map of file extensions to template content inserted after the shebang"
+        },
+        "autosh.enabledExtensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            ".sh"
+          ],
+          "description": "File extensions that trigger automatic shebang insertion"
+        },
+        "autosh.showNotification": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a notification when a shebang is automatically added"
+        },
+        "autosh.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a status bar indicator when a shebang is added"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "autosh.addShebang",
+        "title": "Autosh: Add Shebang"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  }
+}

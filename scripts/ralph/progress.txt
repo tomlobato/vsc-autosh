@@ -1,0 +1,20 @@
+# Ralph Progress Log
+Started: Seg  2 Mar 2026 10:28:36 -03
+
+## Codebase Patterns
+- Build: `npm run compile` (esbuild) for bundling, `npm run check-types` (tsc --noEmit) for type checking
+- Entry point: `src/extension.ts` with `activate(context)` / `deactivate()` exports
+- esbuild config is in `esbuild.js` (CJS, context API), externals: ['vscode']
+- Settings are declared in `package.json` under `contributes.configuration.properties`
+- Use `activationEvents: ['onStartupFinished']` for lazy activation
+
+---
+
+## 2026-03-02 - US-001
+- What was implemented: Full project scaffolding — package.json with all 5 settings and command, tsconfig.json, esbuild.js, .vscode/launch.json + tasks.json, .vscodeignore, .gitignore, minimal src/extension.ts stub
+- Files changed: package.json, tsconfig.json, esbuild.js, .vscode/launch.json, .vscode/tasks.json, .vscodeignore, .gitignore, src/extension.ts
+- **Learnings for future iterations:**
+  - esbuild uses the context API (`esbuild.context`) with `--watch` and `--production` flags
+  - VS Code extension debug config uses `extensionHost` type with `--extensionDevelopmentPath`
+  - `@types/vscode` version must match `engines.vscode` minimum
+---
