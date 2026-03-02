@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { createStatusBar } from './statusbar';
-import { handleFileCreated } from './handlers';
+import { handleFileCreated, handleAddShebangCommand } from './handlers';
 
 export function activate(context: vscode.ExtensionContext) {
 	const statusBar = createStatusBar(context);
@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('autosh.addShebang', () => {
-			// Stub — will be implemented in US-004
+			handleAddShebangCommand(statusBar);
 		})
 	);
 }
