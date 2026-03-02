@@ -43,7 +43,7 @@
         "Typecheck passes (npm run check-types)"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -69,7 +69,7 @@
         "Typecheck passes (npm run check-types)"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

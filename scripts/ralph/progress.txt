@@ -7,6 +7,12 @@ Started: Seg  2 Mar 2026 10:28:36 -03
 - esbuild config is in `esbuild.js` (CJS, context API), externals: ['vscode']
 - Settings are declared in `package.json` under `contributes.configuration.properties`
 - Use `activationEvents: ['onStartupFinished']` for lazy activation
+- Config reads: `vscode.workspace.getConfiguration('autosh').get<T>('key', default)` — no caching needed
+- Status bar: create with `vscode.window.createStatusBarItem(Right)`, push to `context.subscriptions`
+- Module pattern: `src/config.ts` for settings, `src/statusbar.ts` for status bar, `src/handlers.ts` for file handlers
+- Use `WorkspaceEdit` (not `editor.edit()`) when the document isn't yet open in an editor
+- `onDidCreateFiles` fires for new files only — not when opening existing files
+- chmod uses `fs.promises.chmod(path, 0o755)` with try/catch, skipped on Windows
 
 ---
 
@@ -17,4 +23,24 @@ Started: Seg  2 Mar 2026 10:28:36 -03
   - esbuild uses the context API (`esbuild.context`) with `--watch` and `--production` flags
   - VS Code extension debug config uses `extensionHost` type with `--extensionDevelopmentPath`
   - `@types/vscode` version must match `engines.vscode` minimum
+---
+
+## 2026-03-02 - US-002
+- What was implemented: Config reader module (src/config.ts) with 4 exported functions and status bar module (src/statusbar.ts) with create and flash functions
+- Files changed: src/config.ts (new), src/statusbar.ts (new)
+- **Learnings for future iterations:**
+  - `getConfig()` helper keeps the config key DRY across functions
+  - Use `ReturnType<typeof setTimeout>` to avoid Node.js vs browser type conflicts
+  - Flash timer needs cleanup (`clearTimeout`) to prevent overlapping flashes
+  - Status bar `hide()`/`show()` is the correct API — not `visible` property
+---
+
+## 2026-03-02 - US-003
+- What was implemented: Auto-setup handler (`src/handlers.ts`) with `handleFileCreated` function, and wired up `src/extension.ts` with `onDidCreateFiles` listener, status bar creation, and stub command registration
+- Files changed: src/handlers.ts (new), src/extension.ts (updated)
+- **Learnings for future iterations:**
+  - Use `WorkspaceEdit` for inserting content into documents not yet open in an editor — `editor.edit()` requires an active TextEditor
+  - `onDidCreateFiles` provides a `FileCreateEvent` with a `files` array of URIs — iterate to handle each
+  - Cursor positioning after insert: count lines of inserted content, place on the empty line after shebang
+  - `document.getText().length` is the reliable way to check if a file is empty (not `lineCount`)
 ---
